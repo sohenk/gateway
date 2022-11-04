@@ -21,6 +21,8 @@ vendor/
 *.so
 cmd/gateway/gateway
 examples/helloworld/helloworld
+cmd/gateway/cache
+cmd/gateway/log
 
 # OS General
 Thumbs.db
