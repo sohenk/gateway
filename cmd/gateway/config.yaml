@@ -22,28 +22,35 @@ middlewares:
         - POST
         - OPTIONS
 endpoints:
-  - path: /helloworld/*
+  - path: /api/backendservice/*
     timeout: 1s
-    protocol: HTTP
+    protocol: GRPC
     backends:
-      - target: '127.0.0.1:8000'
-#      - target: 'discovery:///bbs'
+      # - target: '127.0.0.1:8888'
+      - target: 'discovery:///api.servicebackend.admin.v1.grpc'
     middlewares:
       - name: circuitbreaker
         options:
           '@type': type.googleapis.com/gateway.middleware.circuitbreaker.v1.CircuitBreaker
           successRatio: {"success":0.6, "request":"1", "bucket":"10", "window":"3s"}
-          backupService: {"endpoint":{"backends":[{"target":"127.0.0.1:8001"}]}}
+          # backupService: {"endpoint":{"backends":[{"target":"127.0.0.1:8001"}]}}
           assertCondtions:
-          - {"by_status_code":"200"}
+          - {"by_status_code":"200-500"}
       - name: rewrite
         options:
           '@type': type.googleapis.com/gateway.middleware.rewrite.v1.Rewrite
-#          stripPrefix: /bbs
-  - path: /helloworld.Greeter/*
+          pathRewrite: '/api/backendservice/'
+          pathRewriteTo: '/api.servicebackend.admin.v1.Servicebackend/'
+  - path: /hello/*
     method: POST
     timeout: 1s
     protocol: GRPC
+    middlewares:
+      - name: rewrite
+        options:
+          '@type': type.googleapis.com/gateway.middleware.rewrite.v1.Rewrite
+          pathRewrite: '/hello/'
+          pathRewriteTo: '/helloworld.v1.Greeter/'
     backends:
       - target: '127.0.0.1:9000'
     retry:
